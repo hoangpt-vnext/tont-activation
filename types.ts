@@ -1,3 +1,4 @@
+
 export interface ProgramEvent {
   id: string;
   city: string;
@@ -8,21 +9,41 @@ export interface ProgramEvent {
   mapLink?: string; // Optional custom link
   brand: string;
   description?: string;
+  
+  // New fields for extended information
+  scale?: string;    // Full/Basic
+  bu?: string;       // Business Unit
+  region?: string;   // Region
+  outletId?: string; // Outlet ID
+  saleRep?: string;  // Sales Rep Name
 }
+
+export type ProgramType = 'Activation' | 'AWO';
+export type Region = 'NTW' | 'GHCM' | 'CE' | 'NO' | 'MKD';
 
 export interface Promotion {
   id: string;
   title: string;
-  image: string;
   brand: string;
-  content: string; // New field for blog/rules content
+  content: string;
+  
+  // Two unified image fields
+  image: string;       // For Laptop/Desktop (1920x1080)
+  mobileImage: string; // For Mobile (1080x1350 or 1080x1920)
+
+  // Fields
+  type: ProgramType;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  regions: Region[];
+  venueListLink?: string; // Only for AWO
 }
 
 export interface AppSettings {
   logoUrl: string;
   
   // Hero Section (Home)
-  heroImage: string;
+  heroImage: string; 
   heroTitle: string;
   heroSubtitle: string;
 
@@ -53,4 +74,4 @@ export interface FilterState {
   dateTo: string;
 }
 
-export type View = 'home' | 'schedule' | 'admin' | 'program-detail';
+export type View = 'home' | 'schedule' | 'program-detail' | 'program-list';

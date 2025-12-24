@@ -1,90 +1,68 @@
 import React from 'react';
-import { ArrowLeft, Calendar, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
 import { Promotion, View } from '../types';
 
 interface ProgramDetailPageProps {
   program?: Promotion;
   onBack: () => void;
   setCurrentView: (view: View) => void;
+  onViewScheduleWithBrand?: (brand: string) => void;
+  language: 'vi' | 'en';
 }
 
-const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, setCurrentView }) => {
-  if (!program) {
-    return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Không tìm thấy chương trình</h2>
-            <button onClick={onBack} className="text-green-700 hover:underline">Quay lại trang chủ</button>
-        </div>
-    );
-  }
+const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, setCurrentView, onViewScheduleWithBrand, language }) => {
+  if (!program) return <div className="p-20 text-center">No program found.</div>;
+
+  const handleCta = () => {
+      if (program.type === 'Activation') {
+          onViewScheduleWithBrand ? onViewScheduleWithBrand(program.brand) : setCurrentView('schedule');
+      } else if (program.venueListLink) {
+          window.open(program.venueListLink, '_blank');
+      }
+  };
+
+  const t = {
+    back: language === 'vi' ? 'Quay lại' : 'Back',
+    ctaActivation: language === 'vi' ? 'Tra cứu lịch trình ngay' : 'Check schedule now',
+    ctaAwo: language === 'vi' ? 'Xem danh sách quán áp dụng' : 'View participating venues',
+    offerMsg: language === 'vi' ? 'Bạn muốn nhận ưu đãi từ chương trình?' : 'Want to get offers from this program?'
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header Image */}
-      <div className="relative h-[40vh] md:h-[50vh] w-full">
-        <img 
-            src={program.image} 
-            alt={program.title} 
-            className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-        
-        <div className="absolute top-6 left-4 sm:left-8 z-10">
-            <button 
-                onClick={onBack}
-                className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md text-white rounded-full hover:bg-white/30 transition-colors"
-            >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Quay lại</span>
-            </button>
-        </div>
-
-        <div className="absolute bottom-0 left-0 w-full p-4 sm:p-8 md:p-12">
-            <div className="max-w-4xl mx-auto">
-                <span className="inline-block px-3 py-1 bg-green-600 text-white text-sm font-bold rounded-full mb-4">
-                    {program.brand}
-                </span>
-                <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                    {program.title}
-                </h1>
-            </div>
-        </div>
+    <div className="min-h-screen bg-white">
+      <div className="relative h-[45vh] md:h-[60vh] bg-gray-900">
+        <picture className="w-full h-full">
+            <source media="(max-width: 768px)" srcSet={program.mobileImage || program.image} />
+            <img src={program.image} alt={program.title} className="w-full h-full object-cover opacity-80" />
+        </picture>
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+        <button onClick={onBack} className="absolute top-6 left-6 px-4 py-2 bg-white/20 backdrop-blur-md text-white rounded-full hover:bg-white/30 flex items-center gap-2 transition-all">
+            <ArrowLeft className="w-5 h-5" /> {t.back}
+        </button>
       </div>
 
-      {/* Content Body */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-8 relative z-10">
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10">
-            <div className="flex items-center gap-6 mb-8 border-b border-gray-100 pb-6 text-gray-500 text-sm">
-                <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4" />
-                    <span>{program.brand}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Đang diễn ra</span>
-                </div>
+      <div className="max-w-4xl mx-auto px-6 -mt-32 relative z-10 pb-20">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-50">
+            <div className="flex gap-2 mb-6">
+                <span className="px-4 py-1.5 bg-green-700 text-white text-xs font-bold rounded-full uppercase">{program.brand}</span>
+                <span className="px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-full uppercase">{program.type}</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-black text-gray-900 mb-8 leading-tight">{program.title}</h1>
+            
+            <div className="flex gap-8 mb-10 text-gray-500 text-sm font-medium">
+                <span className="flex items-center gap-2"><Calendar className="w-5 h-5 text-green-700" /> {program.startDate} - {program.endDate}</span>
+                <span className="flex items-center gap-2"><Tag className="w-5 h-5 text-green-700" /> {program.regions.join(', ')}</span>
             </div>
 
-            <div className="prose prose-lg max-w-none prose-green prose-img:rounded-xl">
-                {/* Render content handling newlines */}
-                {program.content ? (
-                    program.content.split('\n').map((paragraph, idx) => (
-                        <p key={idx} className="mb-4 text-gray-700 leading-relaxed">
-                            {paragraph}
-                        </p>
-                    ))
-                ) : (
-                    <p className="text-gray-500 italic">Chưa có nội dung chi tiết cho chương trình này.</p>
-                )}
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                {program.content.split('\n').map((p, i) => <p key={i} className="mb-4">{p}</p>)}
             </div>
 
-            <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col items-center text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Bạn muốn tham gia sự kiện này?</h3>
-                <button 
-                    onClick={() => setCurrentView('schedule')}
-                    className="px-8 py-3 bg-green-700 text-white font-bold rounded-lg hover:bg-green-800 transition-colors shadow-lg hover:shadow-green-700/30"
-                >
-                    Tra cứu lịch trình ngay
+            <div className="mt-16 pt-10 border-t flex flex-col items-center">
+                <p className="text-gray-500 mb-6 font-medium">{t.offerMsg}</p>
+                <button onClick={handleCta} className="px-10 py-4 bg-green-700 text-white font-bold rounded-full hover:bg-green-800 transition-all shadow-xl flex items-center gap-2">
+                    {program.type === 'Activation' ? t.ctaActivation : t.ctaAwo}
+                    <ExternalLink className="w-5 h-5" />
                 </button>
             </div>
         </div>

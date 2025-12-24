@@ -5,9 +5,10 @@ import { askScheduleAssistant } from '../services/geminiService';
 
 interface GeminiAssistantProps {
   currentEvents: ProgramEvent[];
+  language: 'vi' | 'en';
 }
 
-const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
+const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents, language }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState<string | null>(null);
@@ -20,11 +21,18 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
     setIsLoading(true);
     setResponse(null);
     
-    // Call the service
     const answer = await askScheduleAssistant(query, currentEvents);
     
     setResponse(answer);
     setIsLoading(false);
+  };
+
+  const t = {
+    title: language === 'vi' ? 'Trợ lý Lịch Trình AI' : 'AI Schedule Assistant',
+    collapse: language === 'vi' ? 'Thu gọn' : 'Collapse',
+    intro: language === 'vi' ? 'Hỏi tôi bất cứ điều gì về lịch trình đang hiển thị. Ví dụ: "Tuần này có sự kiện nào ở Hà Nội không?"' : 'Ask me anything about the schedule. For example: "Any events in Hanoi this week?"',
+    placeholder: language === 'vi' ? 'Nhập câu hỏi của bạn...' : 'Enter your question...',
+    quickAsk: language === 'vi' ? 'Bấm để hỏi thông tin lịch trình nhanh chóng...' : 'Click to quickly ask about the schedule...'
   };
 
   return (
@@ -36,14 +44,14 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-white">
             <Sparkles className="w-6 h-6 animate-pulse" />
-            <h2 className="text-lg font-bold">Trợ lý Lịch Trình AI</h2>
+            <h2 className="text-lg font-bold">{t.title}</h2>
           </div>
           {isOpen && (
             <button 
                 onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
                 className="text-white/80 hover:text-white text-sm bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm"
             >
-                Thu gọn
+                {t.collapse}
             </button>
           )}
         </div>
@@ -51,7 +59,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
         {isOpen ? (
           <div className="animate-in fade-in slide-in-from-top-2 duration-300">
             <p className="text-green-100 text-sm mb-4">
-              Hỏi tôi bất cứ điều gì về lịch trình đang hiển thị. Ví dụ: "Tuần này có sự kiện nào ở Hà Nội không?" hay "Tìm quán nào có Heineken?"
+              {t.intro}
             </p>
             
             <form onSubmit={handleAsk} className="relative mb-4">
@@ -59,7 +67,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
                 type="text" 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Nhập câu hỏi của bạn..."
+                placeholder={t.placeholder}
                 className="w-full pl-4 pr-12 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-green-100 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-md"
               />
               <button 
@@ -81,7 +89,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ currentEvents }) => {
           </div>
         ) : (
             <div className="text-green-100 text-sm flex items-center justify-between">
-                 <span>Bấm để hỏi thông tin lịch trình nhanh chóng...</span>
+                 <span>{t.quickAsk}</span>
                  <span className="text-xs bg-white/20 px-2 py-1 rounded">Beta</span>
             </div>
         )}

@@ -1,16 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import FilterBar from './FilterBar';
 import EventTable from './EventTable';
 import GeminiAssistant from './GeminiAssistant';
 import { FilterState, ProgramEvent, SortConfig, SortField, AppSettings } from '../types';
+import { CalendarRange } from 'lucide-react';
 
 interface SchedulePageProps {
   events: ProgramEvent[];
   settings?: AppSettings;
+  initialBrandFilter?: string | null;
+  language: 'vi' | 'en';
 }
 
-const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
-  // State for filtering
+const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings, initialBrandFilter, language }) => {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     city: '',
@@ -19,16 +21,19 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
     dateTo: ''
   });
 
-  // State for Past Events visibility
-  const [showPastEvents, setShowPastEvents] = useState(true);
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
-  // State for sorting
+  useEffect(() => {
+    if (initialBrandFilter) {
+      setFilters(prev => ({ ...prev, brand: initialBrandFilter }));
+    }
+  }, [initialBrandFilter]);
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     field: 'date',
     order: 'asc'
   });
 
-  // Handle Sort Click
   const handleSort = (field: SortField) => {
     setSortConfig(current => ({
       field,
@@ -36,7 +41,6 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
     }));
   };
 
-  // Reset Filters
   const handleResetFilters = () => {
     setFilters({
       search: '',
@@ -45,15 +49,51 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
       dateFrom: '',
       dateTo: ''
     });
-    setShowPastEvents(true);
+    setShowPastEvents(false);
   };
 
-  // Derived state
+  const dateWindow = useMemo(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const currentMonday = new Date(today);
+    currentMonday.setDate(today.getDate() - diffToMonday);
+
+    const startDate = new Date(currentMonday);
+    startDate.setDate(currentMonday.getDate() - 7);
+
+    const endDate = new Date(currentMonday);
+    endDate.setDate(currentMonday.getDate() + 13);
+
+    const toISODate = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const toVNString = (d: Date) => {
+        return `${d.getDate()}/${d.getMonth() + 1}`;
+    };
+
+    const prefix = language === 'vi' ? 'Từ' : 'From';
+    const middle = language === 'vi' ? 'đến' : 'to';
+    const suffix = language === 'vi' ? '(3 tuần)' : '(3 weeks)';
+
+    return {
+        start: toISODate(startDate),
+        end: toISODate(endDate),
+        label: `${prefix} ${toVNString(startDate)} ${middle} ${toVNString(endDate)} ${suffix}`
+    };
+  }, [language]);
+
   const processedEvents = useMemo(() => {
     let result = [...events];
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // 1. Filtering (Basic)
+    result = result.filter(e => e.date >= dateWindow.start && e.date <= dateWindow.end);
+
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       result = result.filter(e => 
@@ -67,6 +107,7 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
     if (filters.brand) {
       result = result.filter(e => e.brand === filters.brand);
     }
+    
     if (filters.dateFrom) {
       result = result.filter(e => e.date >= filters.dateFrom);
     }
@@ -74,25 +115,18 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
       result = result.filter(e => e.date <= filters.dateTo);
     }
 
-    // 2. Filter Past Events if toggle is OFF
     if (!showPastEvents) {
         result = result.filter(e => e.date >= today);
     }
 
-    // 3. Sorting
-    // Logic: Always push past events to the bottom unless hidden.
-    // Within the groups (Future vs Past), apply the user's selected sort.
     result.sort((a, b) => {
       const isPastA = a.date < today;
       const isPastB = b.date < today;
 
-      // Primary Sort Key: Past status (Future comes before Past)
       if (isPastA !== isPastB) {
-          // If A is past (true) and B is not (false), A should come after B. Return 1.
           return isPastA ? 1 : -1;
       }
 
-      // Secondary Sort Key: User selection
       const aValue = a[sortConfig.field];
       const bValue = b[sortConfig.field];
 
@@ -108,11 +142,16 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
     });
 
     return result;
-  }, [events, filters, sortConfig, showPastEvents]);
+  }, [events, filters, sortConfig, showPastEvents, dateWindow]);
+
+  const t = {
+    range: language === 'vi' ? 'Phạm vi hiển thị:' : 'Display range:',
+    title: language === 'vi' ? settings?.scheduleTitle || 'Lịch Trình Sự Kiện' : 'Event Schedule',
+    subtitle: language === 'vi' ? settings?.scheduleSubtitle || 'Tìm kiếm và theo dõi các hoạt động activation mới nhất.' : 'Search and track the latest activation activities.'
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 pb-12 relative overflow-hidden">
-      {/* Star Pattern Background */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none opacity-20"
         style={{
@@ -121,32 +160,37 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings }) => {
       ></div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-            <h2 className="text-3xl font-bold text-green-800 mb-2">
-                {settings?.scheduleTitle || 'Lịch Trình Sự Kiện'}
-            </h2>
-            <p className="text-gray-600">
-                {settings?.scheduleSubtitle || 'Tìm kiếm và theo dõi các hoạt động activation mới nhất.'}
-            </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h2 className="text-3xl font-bold text-green-800 mb-2">
+                    {t.title}
+                </h2>
+                <p className="text-gray-600">
+                    {t.subtitle}
+                </p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm border border-green-200 text-green-800 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
+                <CalendarRange className="w-4 h-4" />
+                <span>{t.range} {dateWindow.label}</span>
+            </div>
         </div>
 
-        {/* AI Assistant Section */}
-        <GeminiAssistant currentEvents={processedEvents} />
+        <GeminiAssistant currentEvents={processedEvents} language={language} />
 
-        {/* Filters Section */}
         <FilterBar 
           filters={filters} 
           setFilters={setFilters} 
           showPastEvents={showPastEvents}
           setShowPastEvents={setShowPastEvents}
           onReset={handleResetFilters} 
+          language={language}
         />
 
-        {/* Data Table Section */}
         <EventTable 
           events={processedEvents} 
           sortConfig={sortConfig} 
-          onSort={handleSort} 
+          onSort={handleSort}
+          language={language}
         />
       </div>
     </div>
