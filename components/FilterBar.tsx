@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Filter, Calendar, MapPin, Search, Tag, EyeOff } from 'lucide-react';
+import { Filter, Search, Tag, RotateCcw, MapPin, Building2 } from 'lucide-react';
 import { FilterState } from '../types';
 import { CITIES, BRANDS } from '../constants';
 
@@ -10,133 +11,106 @@ interface FilterBarProps {
   setShowPastEvents: (show: boolean) => void;
   onReset: () => void;
   language: 'vi' | 'en';
+  context?: 'Activation' | 'AWO';
+  variant?: 'green' | 'blue';
+  // New props for customization
+  locationLabel?: string;
+  locationOptions?: string[];
 }
 
-const FilterBar: React.FC<FilterBarProps> = ({ filters, setFilters, showPastEvents, setShowPastEvents, onReset, language }) => {
+const FilterBar: React.FC<FilterBarProps> = ({ 
+  filters, 
+  setFilters, 
+  showPastEvents, 
+  setShowPastEvents, 
+  onReset, 
+  language, 
+  context = 'Activation',
+  variant = 'green',
+  locationLabel,
+  locationOptions = CITIES
+}) => {
   const handleChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const getPlaceholder = () => {
+    if (context === 'AWO') {
+        return language === 'vi' ? 'Tìm chương trình...' : 'Search program...';
+    }
+    return language === 'vi' ? 'Tìm quán, địa chỉ...' : 'Search venue...';
+  };
+
   const t = {
-    title: language === 'vi' ? 'Bộ lọc tìm kiếm' : 'Search Filters',
-    hidePast: language === 'vi' ? 'Ẩn sự kiện đã qua' : 'Hide past events',
-    searchPlaceholder: language === 'vi' ? 'Tìm tên quán, địa chỉ...' : 'Search venue, address...',
-    allCities: language === 'vi' ? 'Tất cả thành phố' : 'All Cities',
+    title: language === 'vi' ? 'Bộ lọc' : 'Filters',
+    hidePast: language === 'vi' ? 'Ẩn cũ' : 'Hide past',
+    searchPlaceholder: getPlaceholder(),
+    allLocations: locationLabel ? `Tất cả ${locationLabel}` : (language === 'vi' ? 'Tất cả TP' : 'All Cities'),
     allBrands: language === 'vi' ? 'Tất cả Brand' : 'All Brands',
     from: language === 'vi' ? 'Từ' : 'From',
     to: language === 'vi' ? 'Đến' : 'To',
     reset: language === 'vi' ? 'Xóa' : 'Clear'
   };
 
+  const bgGradient = variant === 'blue' ? 'from-blue-700 to-blue-600' : 'from-green-700 to-green-600';
+  const accentColor = variant === 'blue' ? 'text-blue-200' : 'text-green-200';
+  const focusRing = variant === 'blue' ? 'focus:ring-blue-400' : 'focus:ring-green-400';
+  const toggleBg = variant === 'blue' ? 'bg-blue-400' : 'bg-green-400';
+
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2 text-green-800 font-semibold">
-            <Filter className="w-5 h-5 text-green-700" />
-            <span>{t.title}</span>
+    <div className={`bg-gradient-to-r ${bgGradient} p-3 sm:p-5 rounded-xl shadow-lg mb-4 border border-white/10`}>
+      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-5">
+        <div className="flex items-center gap-1.5 text-white font-bold">
+            <Filter className={`w-4 h-4 sm:w-5 sm:h-5 ${accentColor}`} />
+            <span className="text-sm sm:text-lg tracking-tight uppercase">{t.title}</span>
         </div>
         
         <div className="flex items-center gap-2">
-            <label className="flex items-center cursor-pointer select-none gap-2 text-sm text-gray-600 hover:text-green-700 transition-colors">
+            <button onClick={onReset} className="flex items-center gap-1 px-2 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] sm:text-xs font-bold transition-all border border-white/20 backdrop-blur-sm">
+                <RotateCcw className="w-3 h-3" /> {t.reset}
+            </button>
+            <div className="h-4 w-px bg-white/20"></div>
+            <label className="flex items-center cursor-pointer select-none gap-1.5 text-[10px] sm:text-sm text-white/90">
                 <div className="relative">
-                    <input 
-                        type="checkbox" 
-                        className="sr-only"
-                        checked={!showPastEvents}
-                        onChange={() => setShowPastEvents(!showPastEvents)}
-                    />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${!showPastEvents ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${!showPastEvents ? 'translate-x-4' : ''}`}></div>
+                    <input type="checkbox" className="sr-only" checked={!showPastEvents} onChange={() => setShowPastEvents(!showPastEvents)} />
+                    <div className={`block w-7 h-4 sm:w-9 sm:h-5 rounded-full transition-colors ${!showPastEvents ? toggleBg : 'bg-black/30 border border-white/10'}`}></div>
+                    <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-transform ${!showPastEvents ? 'translate-x-3 sm:translate-x-4' : ''}`}></div>
                 </div>
-                <span className="flex items-center gap-1">
-                    <EyeOff className="w-4 h-4" />
-                    {t.hidePast}
-                </span>
+                <span className="font-medium whitespace-nowrap">{t.hidePast}</span>
             </label>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="relative col-span-1 lg:col-span-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-                type="text"
-                placeholder={t.searchPlaceholder}
-                value={filters.search}
-                onChange={(e) => handleChange('search', e.target.value)}
-                className="pl-10 w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-            />
-        </div>
-
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
         <div className="relative">
-             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MapPin className="h-4 w-4 text-gray-400" />
-            </div>
-            <select
-                value={filters.city}
-                onChange={(e) => handleChange('city', e.target.value)}
-                className="pl-10 w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none"
-            >
-                <option value="">{t.allCities}</option>
-                {CITIES.map(city => (
-                <option key={city} value={city}>{city}</option>
-                ))}
-            </select>
-        </div>
-
-        <div className="relative">
-             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Tag className="h-4 w-4 text-gray-400" />
-            </div>
-            <select
-                value={filters.brand}
-                onChange={(e) => handleChange('brand', e.target.value)}
-                className="pl-10 w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none"
-            >
+            <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <select value={filters.brand} onChange={(e) => handleChange('brand', e.target.value)} className={`pl-8 w-full p-2 bg-white border border-transparent rounded-lg text-xs sm:text-sm focus:ring-2 ${focusRing} outline-none appearance-none shadow-sm cursor-pointer h-9 sm:h-10`}>
                 <option value="">{t.allBrands}</option>
-                {BRANDS.map(brand => (
-                <option key={brand} value={brand}>{brand}</option>
-                ))}
+                {BRANDS.map(brand => <option key={brand} value={brand}>{brand}</option>)}
             </select>
         </div>
-
-        <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">{t.from}</span>
-            <div className="relative w-full">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                    type="date"
-                    value={filters.dateFrom}
-                    onChange={(e) => handleChange('dateFrom', e.target.value)}
-                    className="pl-10 w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-600"
-                />
-            </div>
+        <div className="relative">
+            {locationLabel === 'BU' ? (
+                <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            ) : (
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            )}
+            <select value={filters.city} onChange={(e) => handleChange('city', e.target.value)} className={`pl-8 w-full p-2 bg-white border border-transparent rounded-lg text-xs sm:text-sm focus:ring-2 ${focusRing} outline-none appearance-none shadow-sm cursor-pointer h-9 sm:h-10`}>
+                <option value="">{t.allLocations}</option>
+                {locationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
         </div>
-
-        <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">{t.to}</span>
-            <div className="relative flex-1">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                    type="date"
-                    value={filters.dateTo}
-                    onChange={(e) => handleChange('dateTo', e.target.value)}
-                    className="pl-10 w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-600"
-                />
-            </div>
-             <button 
-                onClick={onReset}
-                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors whitespace-nowrap"
-                title={t.reset}
-            >
-                {t.reset}
-            </button>
+        <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-lg">
+            <span className="pl-1 text-[9px] font-black text-white/80 uppercase">{t.from}</span>
+            <input type="date" value={filters.dateFrom} onChange={(e) => handleChange('dateFrom', e.target.value)} className={`w-full p-1 bg-white border-none rounded text-xs focus:ring-2 ${focusRing} outline-none shadow-sm h-7 sm:h-8`} />
+        </div>
+        <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-lg">
+            <span className="pl-1 text-[9px] font-black text-white/80 uppercase">{t.to}</span>
+            <input type="date" value={filters.dateTo} onChange={(e) => handleChange('dateTo', e.target.value)} className={`w-full p-1 bg-white border-none rounded text-xs focus:ring-2 ${focusRing} outline-none shadow-sm h-7 sm:h-8`} />
+        </div>
+        <div className="relative col-span-2 lg:col-span-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <input type="text" placeholder={t.searchPlaceholder} value={filters.search} onChange={(e) => handleChange('search', e.target.value)} className={`pl-8 w-full p-2 bg-white border border-transparent rounded-lg text-xs sm:text-sm focus:ring-2 ${focusRing} outline-none transition-all shadow-sm h-9 sm:h-10`} />
         </div>
       </div>
     </div>

@@ -1,14 +1,16 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { ProgramEvent } from '../types';
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+// Fix: Always use the named parameter and direct access to process.env.API_KEY for initialization.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const askScheduleAssistant = async (
   question: string,
   currentEvents: ProgramEvent[]
 ): Promise<string> => {
-  if (!apiKey) {
+  // Fix: Check for process.env.API_KEY directly.
+  if (!process.env.API_KEY) {
     return "Vui lòng cấu hình API Key để sử dụng tính năng này.";
   }
 
@@ -30,11 +32,13 @@ export const askScheduleAssistant = async (
       4. Định dạng câu trả lời sử dụng Markdown cơ bản nếu cần (in đậm tên quán hoặc brand).
     `;
 
+    // Fix: Call generateContent with the model name and contents prompt.
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
+    // Fix: Use the .text property (not a method) to extract output.
     return response.text || "Xin lỗi, tôi không thể xử lý câu hỏi lúc này.";
   } catch (error) {
     console.error("Gemini API Error:", error);

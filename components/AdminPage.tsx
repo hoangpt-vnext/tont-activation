@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Upload, Save, Plus, Trash2, FileSpreadsheet, Download, AlertCircle, CheckCircle2, Layout, ImageIcon, Link as LinkIcon, Image as ImageLucide, Type, FileText, X, ArrowUp, ArrowDown, Calendar, Tag, ExternalLink, Smartphone, Monitor, Grid, Home, FileImage } from 'lucide-react';
 import { ProgramEvent, AppSettings, Promotion, Region } from '../types';
@@ -52,6 +53,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ events, setEvents, settings, setS
 
   const addNewPromotion = () => {
       const today = new Date().toISOString().split('T')[0];
+      // Fix: Added missing required property 'cities' to conform with Promotion interface
       const newPromo: Promotion = {
           id: `promo-${Date.now()}`,
           title: 'Chương trình mới',
@@ -62,7 +64,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ events, setEvents, settings, setS
           type: 'Activation',
           startDate: today,
           endDate: today,
-          regions: ['NTW']
+          regions: ['NTW'],
+          cities: []
       };
       setLocalSettings(prev => ({ ...prev, promotions: [newPromo, ...prev.promotions] }));
       showNotification('success', 'Đã thêm chương trình mới!');

@@ -2,7 +2,7 @@ import { AppSettings } from './types';
 import { PROMOTION_DATA } from './data_promotions';
 import { EVENT_DATA } from './data_events';
 
-export const CITIES = ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng', 'Nha Trang', 'Vũng Tàu', 'Bình Dương'];
+export const CITIES = ['Hà Nội', 'TP.HCM', 'BRVT', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng', 'Nha Trang', 'Vũng Tàu', 'Bình Dương'];
 export const BRANDS = ['Heineken', 'Tiger', 'Bia Việt', 'Bivina', 'Larue', 'Strongbow', 'Edelweiss'];
 export const REGIONS = ['NTW', 'GHCM', 'CE', 'NO', 'MKD'];
 

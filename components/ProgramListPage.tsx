@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Promotion, ProgramType, Region, View } from '../types';
 import { REGIONS } from '../constants';
@@ -40,6 +41,15 @@ const ProgramListPage: React.FC<ProgramListPageProps> = ({ promotions, onSelectP
     return { activePrograms: active, pastPrograms: past };
   }, [promotions, filterType, filterRegion, searchQuery, todayStr, oneMonthAgoStr]);
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateString;
+  };
+
   const t = {
     title: language === 'vi' ? 'Thông Tin Chương Trình' : 'Program Information',
     searchPlaceholder: language === 'vi' ? 'Tìm tên chương trình...' : 'Search programs...',
@@ -59,9 +69,10 @@ const ProgramListPage: React.FC<ProgramListPageProps> = ({ promotions, onSelectP
     if (lower.includes('heineken')) return 'bg-green-600';
     if (lower.includes('tiger')) return 'bg-orange-500';
     if (lower.includes('bia việt')) return 'bg-red-600';
-    if (lower.includes('larue')) return 'bg-yellow-600';
-    if (lower.includes('strongbow')) return 'bg-pink-600';
-    return 'bg-gray-600';
+    if (lower.includes('bivina')) return 'bg-rose-500';
+    if (lower.includes('larue')) return 'bg-yellow-500';
+    if (lower.includes('strongbow')) return 'bg-pink-500';
+    return 'bg-blue-600';
   };
 
   const ProgramCard = ({ promo, isPast }: { promo: Promotion, isPast?: boolean }) => (
@@ -101,7 +112,7 @@ const ProgramListPage: React.FC<ProgramListPageProps> = ({ promotions, onSelectP
                 ))}
             </div>
             <div className="flex items-center justify-between text-[11px] text-gray-400 mt-auto pt-3 border-t border-gray-50">
-                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {promo.startDate}</span>
+                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {formatDate(promo.startDate)}</span>
                 {isPast ? (
                     <span className="flex items-center gap-1 text-red-400 font-medium"><XCircle className="w-3 h-3" /> {t.expired}</span>
                 ) : (

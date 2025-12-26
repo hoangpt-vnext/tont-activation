@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Calendar, Info } from 'lucide-react';
 import { AppSettings, View } from '../types';
@@ -49,7 +50,8 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentView, settings, onSelectP
     schedule: language === 'vi' ? 'Lịch trình' : 'Schedule',
     discover: language === 'vi' ? 'Khám phá Lịch Hoạt Động đang diễn ra tại TONT' : 'Discover ongoing Activation activities at TONT',
     summary: language === 'vi' ? 'Tổng hợp Chương trình' : 'Program Summary',
-    viewNow: language === 'vi' ? 'Xem lịch Activation ngay' : 'View Schedule Now',
+    viewNow: language === 'vi' ? 'Xem lịch Activation ngay' : 'View Activation Schedule',
+    viewAwoNow: language === 'vi' ? 'Xem lịch AWO ngay' : 'View AWO Schedule',
     noInfo: language === 'vi' ? 'Chưa có thông tin chương trình.' : 'No program information available.'
   };
 
@@ -112,12 +114,12 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentView, settings, onSelectP
       </div>
 
       <div className="bg-white py-16 md:py-24">
-        <div className="max-w-4xl mx-auto text-center px-4">
+        <div className="max-w-7xl mx-auto text-center px-4">
           <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-10 leading-tight">
             {t.discover}
           </h3>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
             <button 
               onClick={() => setCurrentView('program-list')}
               className="w-full sm:w-auto px-8 py-4 bg-white text-green-700 border-2 border-green-700 font-bold rounded-full hover:bg-green-50 transition-all shadow-lg transform hover:-translate-y-1"
@@ -129,6 +131,13 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentView, settings, onSelectP
               className="w-full sm:w-auto px-8 py-4 bg-green-700 text-white font-bold rounded-full hover:bg-green-800 transition-all shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
             >
               {t.viewNow}
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={() => setCurrentView('awo-schedule')}
+              className="w-full sm:w-auto px-8 py-4 bg-green-600 text-white font-bold rounded-full hover:bg-green-700 transition-all shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2 border-2 border-green-600"
+            >
+              {t.viewAwoNow}
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>

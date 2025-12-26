@@ -1,7 +1,7 @@
-
 export interface ProgramEvent {
   id: string;
   city: string;
+  ward?: string; // New: Phường/Xã
   date: string; // YYYY-MM-DD
   time: string; // HH:mm - HH:mm
   venue: string;
@@ -36,6 +36,8 @@ export interface Promotion {
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
   regions: Region[];
+  cities: string[];      // New: List of cities for filtering
+  bu?: string;           // New: Business Unit scope
   venueListLink?: string; // Only for AWO
 }
 
@@ -59,10 +61,16 @@ export interface AppSettings {
 }
 
 export type SortField = keyof ProgramEvent;
+export type PromotionSortField = keyof Promotion;
 export type SortOrder = 'asc' | 'desc';
 
 export interface SortConfig {
   field: SortField;
+  order: SortOrder;
+}
+
+export interface PromotionSortConfig {
+  field: PromotionSortField;
   order: SortOrder;
 }
 
@@ -74,4 +82,4 @@ export interface FilterState {
   dateTo: string;
 }
 
-export type View = 'home' | 'schedule' | 'program-detail' | 'program-list';
+export type View = 'home' | 'schedule' | 'awo-schedule' | 'program-detail' | 'program-list';

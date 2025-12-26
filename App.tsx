@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import SchedulePage from './components/SchedulePage';
+import AWOSchedulePage from './components/AWOSchedulePage';
 import ProgramDetailPage from './components/ProgramDetailPage';
 import ProgramListPage from './components/ProgramListPage';
 import { View } from './types';
@@ -69,6 +70,13 @@ function App() {
             events={events} 
             settings={settings} 
             initialBrandFilter={initialScheduleBrand}
+            language={language}
+          />
+        )}
+
+        {currentView === 'awo-schedule' && (
+          <AWOSchedulePage 
+            promotions={settings.promotions}
             language={language}
           />
         )}

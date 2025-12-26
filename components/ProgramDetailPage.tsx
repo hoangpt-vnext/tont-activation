@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
 import { Promotion, View } from '../types';
@@ -12,6 +13,15 @@ interface ProgramDetailPageProps {
 
 const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, setCurrentView, onViewScheduleWithBrand, language }) => {
   if (!program) return <div className="p-20 text-center">No program found.</div>;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateString;
+  };
 
   const handleCta = () => {
       if (program.type === 'Activation') {
@@ -50,7 +60,7 @@ const ProgramDetailPage: React.FC<ProgramDetailPageProps> = ({ program, onBack, 
             <h1 className="text-3xl md:text-5xl font-black text-gray-900 mb-8 leading-tight">{program.title}</h1>
             
             <div className="flex gap-8 mb-10 text-gray-500 text-sm font-medium">
-                <span className="flex items-center gap-2"><Calendar className="w-5 h-5 text-green-700" /> {program.startDate} - {program.endDate}</span>
+                <span className="flex items-center gap-2"><Calendar className="w-5 h-5 text-green-700" /> {formatDate(program.startDate)} - {formatDate(program.endDate)}</span>
                 <span className="flex items-center gap-2"><Tag className="w-5 h-5 text-green-700" /> {program.regions.join(', ')}</span>
             </div>
 

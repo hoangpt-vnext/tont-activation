@@ -1,7 +1,7 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import FilterBar from './FilterBar';
 import EventTable from './EventTable';
-import GeminiAssistant from './GeminiAssistant';
 import { FilterState, ProgramEvent, SortConfig, SortField, AppSettings } from '../types';
 import { CalendarRange } from 'lucide-react';
 
@@ -145,9 +145,9 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings, initialBr
   }, [events, filters, sortConfig, showPastEvents, dateWindow]);
 
   const t = {
-    range: language === 'vi' ? 'Phạm vi hiển thị:' : 'Display range:',
-    title: language === 'vi' ? settings?.scheduleTitle || 'Lịch Trình Sự Kiện' : 'Event Schedule',
-    subtitle: language === 'vi' ? settings?.scheduleSubtitle || 'Tìm kiếm và theo dõi các hoạt động activation mới nhất.' : 'Search and track the latest activation activities.'
+    range: language === 'vi' ? 'Phạm vi:' : 'Range:',
+    title: language === 'vi' ? 'Lịch trình Activation' : 'Activation Schedule',
+    subtitle: language === 'vi' ? settings?.scheduleSubtitle || 'Tìm kiếm và theo dõi các hoạt động mới nhất.' : 'Search and track the latest activities.'
   };
 
   return (
@@ -159,23 +159,21 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings, initialBr
         }}
       ></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="mb-3 sm:mb-6 flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
             <div>
-                <h2 className="text-3xl font-bold text-green-800 mb-2">
+                <h2 className="text-xl md:text-4xl font-black text-green-900 leading-tight">
                     {t.title}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-[10px] md:text-lg text-gray-500">
                     {t.subtitle}
                 </p>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm border border-green-200 text-green-800 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
-                <CalendarRange className="w-4 h-4" />
+            <div className="w-fit bg-white/80 backdrop-blur-sm border border-green-100 text-green-800 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg text-[10px] sm:text-sm font-bold flex items-center gap-1.5 shadow-sm">
+                <CalendarRange className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
                 <span>{t.range} {dateWindow.label}</span>
             </div>
         </div>
-
-        <GeminiAssistant currentEvents={processedEvents} language={language} />
 
         <FilterBar 
           filters={filters} 
@@ -184,6 +182,8 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ events, settings, initialBr
           setShowPastEvents={setShowPastEvents}
           onReset={handleResetFilters} 
           language={language}
+          context="Activation"
+          variant="green"
         />
 
         <EventTable 
